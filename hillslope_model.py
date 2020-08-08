@@ -3,7 +3,7 @@
 # implemented in python instead of Excel to make it easier for excessive
 #   temporal analysis (50+ years)
 #
-# Created by: Samuel Kolston
+# Created by Samuel Kolston
 # Created on: 080820
 # Last edited: 080820
 
@@ -43,8 +43,14 @@ def fb_model(origin, years, feedback):
 
 fb_model(origin, years, FEEDBACK)
 
+'''
 for i in range(len(model_results)):
     plt.plot(x_site, model_results[i], label="Year {}".format(i))
+    if i + 1 == len(model_results):
+        print(model_results[i])
+'''
+plt.plot(x_site, model_results[0], label="Year 1")
+plt.plot(x_site, model_results[len(model_results) - 1], label="Year {}".format(len(model_results) - 1))
 
 
 fontP = FontProperties()
@@ -54,6 +60,6 @@ plt.xticks(np.arange(min(x_site), max(x_site)+1, 1.0))
 plt.subplots_adjust(left=None, bottom=None, right=0.7, top=None, wspace=None, hspace=None)
 plt.xlabel('Site')
 plt.ylabel('Elevation (m)')
-plt.title('Hillslope Profile Modelled under {} Feedback Conditions over {} Year(s)'.format(FEEDBACK.title(), years))
+plt.title('Hillslope Profile Modelled under {} Feedback Conditions \nover {} Year(s)'.format(FEEDBACK.title(), years))
 
 plt.show()
