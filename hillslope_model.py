@@ -22,26 +22,26 @@ origin = [1000, 970, 950, 920, 830, 760, 605, 585, 550, 520, 400, 300, 225, 150,
 
 model_results = [origin]
 
-years = int(input("Number of years to model: "))
+years = int(input("Number of years to model ({} feedback): ".format(FEEDBACK)))
 
 
-def positive_fb(origin, years, feedback):
+def fb_model(origin, years, feedback):
     prev_year = origin
-    for i in range(years):
-        tmp_list = [origin[0]]
-        for x in range(14):
+    for time in range(years):
+        current_year = [origin[0]]
+        for index in range(len(x_site) - 1):
             if feedback == "positive":
-                tmp_list.append(round(prev_year[x+1] - C * (prev_year[x] - prev_year[x+1])))
+                current_year.append(round(prev_year[index+1] - C * (prev_year[index] - prev_year[index+1])))
             elif feedback == "negative":
                 try:
-                    tmp_list.append(round(prev_year[x+1] - C * (prev_year[x+1] - prev_year[x+2])))
+                    current_year.append(round(prev_year[index+1] - C * (prev_year[index+1] - prev_year[index+2])))
                 except IndexError:
-                    tmp_list.append(round(prev_year[x+1] - C * (prev_year[x+1] - 0)))
-        model_results.append(tmp_list)
-        prev_year = tmp_list
+                    current_year.append(round(prev_year[index+1] - C * (prev_year[index+1] - 0)))
+        model_results.append(current_year)
+        prev_year = current_year
 
 
-positive_fb(origin, years, FEEDBACK)
+fb_model(origin, years, FEEDBACK)
 
 for i in range(len(model_results)):
     plt.plot(x_site, model_results[i], label="Year {}".format(i))
