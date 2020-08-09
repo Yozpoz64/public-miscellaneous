@@ -15,15 +15,20 @@
 # modules
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.font_manager import FontProperties
 from matplotlib.pyplot import figure
+import time
+
+# begin time elapsed
+start_time = time.time()
 
 # constants
 C = 0.1                 # level of erosion
 FEEDBACK = "negative"   # changes equation used
-YEARS = 10000              # n years to run
-PLOT_TYPE = 1           # 0 plots origin and last n, 1 plots all n
-SHOW_STATUS = True
+YEARS = 1000000            # n years to run
+PLOT_TYPE = 0           # 0 plots origin and last n, 1 plots all n
+SHOW_STATUS = True      # show progress in console
+DIV_FACTOR = 50000         # frequency of displaying process updates
+SHOW_LIVE = True        # draw the series one by one
 
 # create matplotlib fig
 figure(num=None, figsize=(10, 7), dpi=80, facecolor='w', edgecolor='k')
@@ -61,7 +66,7 @@ def fb_model(origin, years, feedback):
         model_results.append(current_year)
         prev_year = current_year
         if SHOW_STATUS:
-            status_display = show_status(time, YEARS, 100, "modelled")
+            status_display = show_status(time, YEARS, DIV_FACTOR, "modelled")
             if status_display:
                 print(status_display)
 
@@ -70,32 +75,33 @@ def fb_model(origin, years, feedback):
 fb_model(origin, YEARS, FEEDBACK)
 
 # choose how to plot based on constant
-print("plotting\n")
 if PLOT_TYPE == 0:
     for i in range(len(model_results)):
         plt.plot(x_site, model_results[i], label="Year {}".format(i))
-        plt.draw()
+        if SHOW_LIVE:
+            plt.draw()
+            plt.pause(0.01)
         if SHOW_STATUS:
-            status_display = show_status(i, len(model_results) - 1, 100, "plotted")
+            status_display = show_status(i, len(model_results), DIV_FACTOR, "plotted")
             if status_display:
                 print(status_display)
 elif PLOT_TYPE == 1:
     plt.plot(x_site, model_results[0], label="Year 1")
     plt.plot(x_site, model_results[len(model_results) - 1], label="Year {}".format(len(model_results) - 1))
 
-# print final modelled hillslope profile
-print(model_results[-1])
 
-# create plot with custom sizing and labels
-print("rendering")
-fontP = FontProperties()
-fontP.set_size('small')
-plt.legend(ncol=2, bbox_to_anchor=(1.04, 1), loc="upper left", prop=fontP)
+plt.legend(ncol=2, bbox_to_anchor=(1.04, 1), loc="upper left")
 plt.xticks(np.arange(min(x_site), max(x_site)+1, 1.0))
 plt.subplots_adjust(left=None, bottom=None, right=0.7, top=None, wspace=None, hspace=None)
 plt.xlabel('Site')
 plt.ylabel('Elevation (m)')
 plt.title('Hillslope Profile Modelled under {} Feedback Conditions \nover {} Year(s)'.format(FEEDBACK.title(), YEARS))
 
-# show plot
+if SHOW_STATUS:
+    elapsed = round(time.time() - start_time, 4)
+    print("\n{} years of hillslope profiles modelled and plotted in {} seconds".format(YEARS, elapsed))
+    print("final profile:", model_results[-1])
+    #print(, time.time() - start_time, "to run")
+
+# finish plot display (hang)
 plt.show()
