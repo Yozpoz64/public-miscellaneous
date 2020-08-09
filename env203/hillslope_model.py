@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.pyplot import figure
 import time
+import random
 
 # begin time elapsed
 start_time = time.time()
@@ -24,10 +25,10 @@ start_time = time.time()
 # constants
 C = 0.1                 # level of erosion
 FEEDBACK = "negative"   # changes equation used
-YEARS = 1000000            # n years to run
+YEARS = 20            # n years to run
 PLOT_TYPE = 0           # 0 plots origin and last n, 1 plots all n
 SHOW_STATUS = True      # show progress in console
-DIV_FACTOR = 50000         # frequency of displaying process updates
+DIV_FACTOR = 100         # frequency of displaying process updates
 SHOW_LIVE = True        # draw the series one by one
 
 # create matplotlib fig
@@ -53,18 +54,39 @@ def show_status(index, limit, div_factor, action):
 # modelling function
 def fb_model(origin, years, feedback):
     prev_year = origin
+    tmp = [1000]
     for time in range(years):
         current_year = [origin[0]]
         for index in range(len(x_site) - 1):
             if feedback == "positive":
                 current_year.append(round(prev_year[index+1] - C * (prev_year[index] - prev_year[index+1])))
             elif feedback == "negative":
-                try:
-                    current_year.append(round(prev_year[index+1] - C * (prev_year[index+1] - prev_year[index+2])))
-                except IndexError:
-                    current_year.append(round(prev_year[index+1] - C * (prev_year[index+1] - 0)))
-        model_results.append(current_year)
-        prev_year = current_year
+
+                # attempt at improving the negative feedback model
+                if prev_year[index] == (prev_year[0]):
+                    current_year.append(round(tmp[0] - C * (tmp[0] - prev_year[index + 2])))
+                    print(round(tmp[0] - C * (tmp[0] - prev_year[index + 2])))
+
+                    # NEED TO CREATE A LIST HERE FOR EACH YEAR. CURRENTLY ONLY APPENDING A SINGLE YEAR
+                    #   FOR THE IMPROVED MODEL
+
+
+                else:
+                    try:
+                        current_year.append(round(prev_year[index+1] - C * (prev_year[index+1] - prev_year[index+2])))
+                    except IndexError:
+                        current_year.append(round(prev_year[index+1] - C * (prev_year[index+1] - 0)))
+                    model_results.append(current_year)
+
+        # fix to use average decreases to model the first site
+        tmp.append(current_year[1])
+        tmp.pop(0)
+        model_results.append(tmp[0])
+
+        #model_results.append(tmp[0])
+
+        #model_results.append(current_year)
+        #prev_year = current_year
         if SHOW_STATUS:
             status_display = show_status(time, YEARS, DIV_FACTOR, "modelled")
             if status_display:
