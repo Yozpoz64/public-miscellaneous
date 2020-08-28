@@ -14,9 +14,12 @@ from matplotlib.pyplot import figure
 RD = 0.5
 K = 2000
 T = 50
-N_0 = 1
+N_0 = 2000
+Q = 250
+E = 0.5
+TYPE = 1
 
-output = []
+output = [N_0]
 t_list = []
 k_list = []
 
@@ -25,20 +28,33 @@ for time in range(T + 1):
     k_list.append(K)
 
 
-def unharvested(growth_rate, carry_cap, years, origin):
-    output.append(origin)
+def unharvested(growth_rate, carry_cap, years):
     for i in range(years):
         n_t = output[-1]
         output.append(n_t + growth_rate * n_t * (1 - n_t / carry_cap))
 
 
-unharvested(RD, K, T, N_0)
+def harvested(growth_rate, carry_cap, years, quota):
+    for i in range(years):
+        n_t = output[-1]
+        # need to add MAX function or equivalent
+        output.append(n_t + growth_rate * n_t * (1 - n_t / carry_cap) - quota)
+
+
+def stochastic():
+    return
+
+
+if TYPE == 0:
+    unharvested(RD, K, T)
+elif TYPE == 1:
+    harvested(RD, K, T, Q)
+
 
 figure(num=None, figsize=(13, 7), dpi=80, facecolor='w', edgecolor='k')
-
 plt.xlabel('Year')
 plt.ylabel('Population (n)')
-plt.title('Population without Harvesting over {} Year(s)'.format(T))
+plt.title('Population over {} Year(s)'.format(T))
 plt.plot(t_list, output, label="Population")
 plt.plot(t_list, k_list, label="Carrying Capacity")
 plt.legend(ncol=1, bbox_to_anchor=(1.04, 1), loc="upper left")
