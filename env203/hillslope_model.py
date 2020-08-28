@@ -24,7 +24,7 @@ start_time = time.time()
 
 # constants
 C = 0.1                 # level of erosion
-FEEDBACK = "negative"   # changes equation used
+FEEDBACK = "positive"   # changes equation used
 YEARS = 100             # n years to run
 PLOT_TYPE = 0           # 1 plots origin and last n, 0 plots all n
 SHOW_STATUS = True      # show progress in console
