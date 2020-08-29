@@ -80,17 +80,32 @@ if TYPE == 0:
 elif TYPE == 1:
     harvested(RD, K, T, Q)
 
-
+'''
 figure(num=None, figsize=(13, 7), dpi=80, facecolor='w', edgecolor='k')
 plt.xlabel(plots["t"]["label"])
 plt.ylabel(plots["output"]["label"])
-plt.title('Population over {} Year(s)'.format(T))
+plt.title("{} over {} Year(s)".format(plots["output"]["label"], T))
 
 plt.plot(plots["t"]["values"], plots["output"]["values"], label=plots["output"]["label"], color=plots["output"]["colour"])
 plt.plot(plots["t"]["values"], plots["k"]["values"], label=plots["k"]["label"], color=plots["k"]["colour"])
 
 plt.legend(ncol=1, bbox_to_anchor=(1.04, 1), loc="upper left")
 plt.subplots_adjust(left=None, bottom=None, right=0.8, top=None, wspace=None, hspace=None)
+plt.show()
+'''
+figure, subp = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+
+subp[0].set_xlabel(plots["t"]["label"])
+subp[0].set_ylabel(plots["output"]["label"])
+subp[0].set_title("{} over {} Year(s)".format(plots["output"]["label"], T))
+subp[0].plot(plots["t"]["values"], plots["output"]["values"], label=plots["output"]["label"], color=plots["output"]["colour"])
+subp[0].plot(plots["t"]["values"], plots["k"]["values"], label=plots["k"]["label"], color=plots["k"]["colour"])
+subp[0].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+
+subp[1].plot([1, 2, 3], [3, 2, 1])
+figure.tight_layout(pad=3)
+plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
+
 plt.show()
 
 print(plots["output"]["values"])
