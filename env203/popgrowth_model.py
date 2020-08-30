@@ -17,10 +17,30 @@ T = 50
 N_0 = 1
 Q = 250
 E = 0.5
-TYPE = 1
 
 plots = \
     {
+        "unharvested":
+            {
+                "label": "Unharvested",
+                "colour": "blue",
+                "values": [N_0]
+            },
+        "harvested_fq":
+            {
+                "label": "Fixed-quota",
+                "colour": "pink",
+                "values": [K],
+                "actual harvest": []
+            },
+        "harvested_fe":
+            {
+                "label": "Fixed-effort",
+                "colour": "green",
+                "values": [K],
+                "effort line": [],
+                "actual harvest": []
+            },
         "k":
             {
                 "label": "Carrying Capacity",
@@ -39,42 +59,6 @@ plots = \
                 "colour": "orange",
                 "values": [],
             },
-        "output":
-            {
-                "label": "Population",
-                "colour": "blue",
-                "values": [N_0],
-            },
-        "actual harvest":
-            {
-                "label": "Actual Harvest",
-                "colour": "green",
-                "values": [],
-            }
-    }
-
-calc_plots = \
-    {
-        "unharvested":
-            {
-                "label": "Unharvested Population",
-                "colour": "blue",
-                "values": [N_0]
-            },
-        "harvested_fq":
-            {
-                "label": "Fixed-quota Harvested Population",
-                "colour": "purple",
-                "values": [K]
-            },
-        "harvested_fe":
-            {
-                "label": "Fixed-effort Harvested Population",
-                "colour": "green",
-                "values": [],
-                "effort line": [],
-                "actual harvest": []
-            }
     }
 
 for time in range(T + 1):
@@ -84,60 +68,32 @@ for time in range(T + 1):
 
 def logistic_harvesting(growth_rate, carry_cap, years, quota, effort):
     for i in range(years):
-        calc_plots["unharvested"]["values"].append(calc_plots["unharvested"]["values"][-1] + growth_rate *
-                                                   calc_plots["unharvested"]["values"][-1] *
-                                                   (1 - calc_plots["unharvested"]["values"][-1] / carry_cap))
+        # not harvesting
+        plots["unharvested"]["values"].append(plots["unharvested"]["values"][-1] + growth_rate *
+                                              plots["unharvested"]["values"][-1] *
+                                              (1 - plots["unharvested"]["values"][-1] / carry_cap))
 
-        nt_1_q = calc_plots["harvested_fq"]["values"][-1] + growth_rate * calc_plots["harvested_fq"]["values"][-1]\
-                                                * (1 - calc_plots["harvested_fq"]["values"][-1] / carry_cap) - quota
+        # harvesting under fixed quota
+        nt_1_q = plots["harvested_fq"]["values"][-1] + growth_rate * plots["harvested_fq"]["values"][-1] \
+                 * (1 - plots["harvested_fq"]["values"][-1] / carry_cap) - quota
         if nt_1_q >= 0:
-            calc_plots["harvested_fq"]["values"].append(nt_1_q)
+            plots["harvested_fq"]["values"].append(nt_1_q)
         else:
-            calc_plots["harvested_fq"]["values"].append(0)
+            plots["harvested_fq"]["values"].append(0)
 
-        nt_1_e = n_t + growth_rate * n_t * (1 - n_t / carry_cap) - effort * n_t
-
-
-'''
-def unharvested(growth_rate, carry_cap, years):
-    for i in range(years):
-        n_t = plots["output"]["values"][-1]
-        plots["output"]["values"].append(n_t + growth_rate * n_t * (1 - n_t / carry_cap))
-
-
-def harvested_fq(growth_rate, carry_cap, years, quota):
-    for i in range(years):
-        n_t = plots["output"]["values"][-1]
-        n_t_1 = n_t + growth_rate * n_t * (1 - n_t / carry_cap) - quota
-        if n_t_1 >= 0:
-            plots["output"]["values"].append(n_t_1)
+        # harvesting under fixed effort
+        nt_1_e = plots["harvested_fe"]["values"][-1] + growth_rate * plots["harvested_fe"]["values"][-1] * \
+                 (1 - plots["harvested_fe"]["values"][-1] / carry_cap) - effort * \
+                 plots["harvested_fe"]["values"][-1]
+        if nt_1_e >= 0:
+            plots["harvested_fe"]["values"].append(nt_1_e)
         else:
-            plots["output"]["values"].append(0)
+            plots["harvested_fe"]["values"].append(0)
+        plots["harvested_fe"]["actual harvest"].append(effort * nt_1_e)  # THIS DOES NOT WORK - needs the first value
+        plots["harvested_fe"]["effort line"].append(effort * plots["unharvested"]["values"][-1])
 
 
-def harvested_fe(growth_rate, carry_cap, years, effort):
-    for i in range(years):
-        n_t = plots["output"]["values"][-1]
-        n_t_1 = n_t + growth_rate * n_t * (1 - n_t / carry_cap) - effort * n_t
-        if n_t_1 >= 0:
-            plots["output"]["values"].append(n_t_1)
-        else:
-            plots["output"]["values"].append(0)
-        if len(plots["output"]["values"]) > 1:
-            plots["actual harvest"]["values"].append(effort * n_t)
 
-
-def stochastic():
-    return
-
-
-if TYPE == 0:
-    unharvested(RD, K, T)
-elif TYPE == 1:
-    harvested_fq(RD, K, T, Q)
-elif TYPE == 2:
-    harvested_fe(RD, K, T, E)
-'''
 '''
 figure(num=None, figsize=(13, 7), dpi=80, facecolor='w', edgecolor='k')
 plt.xlabel(plots["t"]["label"])
@@ -153,21 +109,26 @@ plt.show()
 '''
 logistic_harvesting(RD, K, T, Q, E)
 figure, subp = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
-'''
-subp[0].set_xlabel(plots["t"]["label"])
-subp[0].set_ylabel(plots["output"]["label"])
-subp[0].set_title("{} over {} Year(s)".format(plots["output"]["label"], T))
-subp[0].plot(plots["t"]["values"], plots["output"]["values"], label=plots["output"]["label"], color=plots["output"]["colour"])
-subp[0].plot(plots["t"]["values"], plots["k"]["values"], label=plots["k"]["label"], color=plots["k"]["colour"])
-subp[0].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
-'''
+plt.suptitle("Population of ____ over {} years".format(T), fontsize=14)
 
-subp[0].plot(calc_plots["unharvested"]["values"])
-subp[0].plot(calc_plots["harvested_fq"]["values"])
+subp[0].set_ylabel("Population")
+subp[0].set_title("Unharvested")
+subp[0].plot(plots["unharvested"]["values"], label=plots["unharvested"]["label"], color=plots["unharvested"]["colour"])
+subp[0].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+
+subp[1].set_title("Harvested")
+subp[1].plot(plots["harvested_fq"]["values"], label=plots["harvested_fq"]["label"], color=plots["harvested_fq"]["colour"])
+subp[1].plot(plots["harvested_fe"]["values"], label=plots["harvested_fe"]["label"], color=plots["harvested_fe"]["colour"])
+subp[1].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+
+plt.xlabel(plots["t"]["label"])
 figure.tight_layout(pad=3)
 plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
-print(plots["actual harvest"]["values"])
-print(plots["output"]["values"])
+print(plots["harvested_fq"]["values"])
+print(plots["harvested_fe"]["values"])
+print(plots["harvested_fe"]["actual harvest"])
+print(plots["harvested_fe"]["effort line"])
+
 
 plt.show()
