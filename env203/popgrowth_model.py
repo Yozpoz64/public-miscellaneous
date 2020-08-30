@@ -65,6 +65,29 @@ for time in range(T + 1):
     plots["t"]["values"].append(time)
 
 
+def gen_log(nt, growth_rate, carry_cap):
+    return nt + growth_rate * nt * (1 - nt / carry_cap)
+
+
+for model in range(T):
+    plots["unharvested"]["values"].append(gen_log(plots["unharvested"]["values"][-1], RD, K))
+
+    nt1_quota = gen_log(plots["harvested_fq"]["values"][-1], RD, K) - Q
+    if nt1_quota >= 0:
+        plots["harvested_fq"]["values"].append(nt1_quota)
+    else:
+        plots["harvested_fq"]["values"].append(0)
+
+    nt1_effort = gen_log(plots["harvested_fe"]["values"][-1], RD, K) - E * plots["harvested_fe"]["values"][-1]
+    if nt1_effort >= 0:
+        plots["harvested_fe"]["values"].append(nt1_effort)
+    else:
+        plots["harvested_fe"]["values"].append(0)
+    plots["harvested_fe"]["actual harvest"].append(E * nt1_effort)
+    plots["harvested_fe"]["effort line"].append(E * plots["unharvested"]["values"][-1])
+
+
+'''
 def logistic_harvesting(growth_rate, carry_cap, years, quota, effort):
     for i in range(years):
         # not harvesting
@@ -93,7 +116,7 @@ def logistic_harvesting(growth_rate, carry_cap, years, quota, effort):
 
 
 logistic_harvesting(RD, K, T, Q, E)
-
+'''
 figure, subp = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 plt.suptitle("Population of ____ over {} years".format(T), fontsize=14)
 
