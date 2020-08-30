@@ -14,6 +14,7 @@ T = 50
 N_0 = 1
 Q = 250
 E = 0.5
+SHOW__STATUS = False
 
 # dict for model values and associated plot preferences
 plots = \
@@ -148,26 +149,19 @@ subp[1, 1].set_xlabel(plots["t"]["label"])
 plt.gcf().text(0.5, 0.05, "where:\n$r_d$={}     $K$={}     $T$={}     $N_0$={}     $Q$={}     $E$={}"
                .format(RD, K, T, N_0, Q, E), fontsize=12, ha="center")
 
-RD = 0.5
-K = 2000
-T = 50
-N_0 = 1
-Q = 250
-E = 0.5
-
-
 # adjust both plots with spacing
 figure.tight_layout(pad=3)
 plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
 # print model output
-print(plots["harvested_fq"]["values"])
-print(plots["harvested_fq"]["actual harvest"])
-print(plots["harvested_fe"]["values"])
-print(plots["harvested_fe"]["actual harvest"])
-print(plots["harvested_fe"]["effort line"])
-print(plots["unharvested"]["values"])
-print(plots["unharvested"]["delta nt"])
+if SHOW__STATUS:
+    print("unharvested output: ", plots["unharvested"]["values"])
+    print("unharvested change: ", plots["unharvested"]["delta nt"])
+    print("\nfixed quota output: ", plots["harvested_fq"]["values"])
+    print("fixed quota actual harvest: ", plots["harvested_fq"]["actual harvest"])
+    print("\nfixed effort output: ", plots["harvested_fe"]["values"])
+    print("fixed effort actual harvest: ", plots["harvested_fe"]["actual harvest"])
+    print("fixed effort effort line: ", plots["harvested_fe"]["effort line"])
 
 # show figure and plots
 plt.show()
