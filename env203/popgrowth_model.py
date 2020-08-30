@@ -64,6 +64,7 @@ plots = \
 for time in range(T + 1):
     plots["k"]["values"].append(K)
     plots["t"]["values"].append(time)
+    plots["q"]["values"].append(Q)
 
 
 # function that performs the base logistic calculation
@@ -108,22 +109,52 @@ for i in range(T + 1):
 
 
 # create figure
-figure, subp = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
+figure, subp = plt.subplots(nrows=2, ncols=2, figsize=(12, 10))
+figure.canvas.set_window_title("Population Growth Model - Samuel Kolston")
 plt.suptitle("Population of ____ over {} years".format(T), fontsize=14)
 
-# left subplot
-subp[0].set_ylabel("Population")
-subp[0].set_title("Unharvested")
-subp[0].plot(plots["unharvested"]["values"], label=plots["unharvested"]["label"], color=plots["unharvested"]["colour"])
-subp[0].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
-subp[0].set_xlabel(plots["t"]["label"])
+# top left subplot
+subp[0, 0].set_ylabel("Population")
+subp[0, 0].set_title(plots["unharvested"]["label"])
+subp[0, 0].plot(plots["unharvested"]["values"], label="N", color=plots["unharvested"]["colour"])
+subp[0, 0].plot(plots["unharvested"]["delta nt"], label="Growth rate", color="red")
+subp[0, 0].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+subp[0, 0].set_xlabel(plots["t"]["label"])
 
-# right subplot
-subp[1].set_title("Harvested")
-subp[1].plot(plots["harvested_fq"]["values"], label=plots["harvested_fq"]["label"], color=plots["harvested_fq"]["colour"])
-subp[1].plot(plots["harvested_fe"]["values"], label=plots["harvested_fe"]["label"], color=plots["harvested_fe"]["colour"])
-subp[1].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
-subp[1].set_xlabel(plots["t"]["label"])
+# top right subplot
+subp[0, 1].set_ylabel("Population")
+subp[0, 1].set_title("Harvested")
+subp[0, 1].plot(plots["harvested_fq"]["values"], label=plots["harvested_fq"]["label"], color=plots["harvested_fq"]["colour"])
+subp[0, 1].plot(plots["harvested_fe"]["values"], label=plots["harvested_fe"]["label"], color=plots["harvested_fe"]["colour"])
+subp[0, 1].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+subp[0, 1].set_xlabel(plots["t"]["label"])
+
+# bottom left subplot
+subp[1, 0].set_ylabel("Population Harvest")
+subp[1, 0].set_title("Quota vs Actual Harvest (Fixed-quota)")
+subp[1, 0].plot(plots["q"]["values"], label="Quota", color="black")
+subp[1, 0].plot(plots["harvested_fq"]["actual harvest"], label="Actual Harvest", color="brown")
+subp[1, 0].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+subp[1, 0].set_xlabel(plots["t"]["label"])
+
+# bottom right subplot
+subp[1, 1].set_ylabel("Population Harvest")
+subp[1, 1].set_title("Fixed-effort Actual Harvest")
+subp[1, 1].plot(plots["harvested_fe"]["actual harvest"], label="Actual Harvest")
+subp[1, 1].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+subp[1, 1].set_xlabel(plots["t"]["label"])
+
+# display constant values below plot
+plt.gcf().text(0.5, 0.05, "where:\n$r_d$={}     $K$={}     $T$={}     $N_0$={}     $Q$={}     $E$={}"
+               .format(RD, K, T, N_0, Q, E), fontsize=12, ha="center")
+
+RD = 0.5
+K = 2000
+T = 50
+N_0 = 1
+Q = 250
+E = 0.5
+
 
 # adjust both plots with spacing
 figure.tight_layout(pad=3)
