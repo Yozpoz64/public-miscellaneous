@@ -8,7 +8,6 @@
 # Last edited: 300820
 
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
 
 
 RD = 0.5
@@ -93,21 +92,8 @@ def logistic_harvesting(growth_rate, carry_cap, years, quota, effort):
         plots["harvested_fe"]["effort line"].append(effort * plots["unharvested"]["values"][-1])
 
 
-
-'''
-figure(num=None, figsize=(13, 7), dpi=80, facecolor='w', edgecolor='k')
-plt.xlabel(plots["t"]["label"])
-plt.ylabel(plots["output"]["label"])
-plt.title("{} over {} Year(s)".format(plots["output"]["label"], T))
-
-plt.plot(plots["t"]["values"], plots["output"]["values"], label=plots["output"]["label"], color=plots["output"]["colour"])
-plt.plot(plots["t"]["values"], plots["k"]["values"], label=plots["k"]["label"], color=plots["k"]["colour"])
-
-plt.legend(ncol=1, bbox_to_anchor=(1.04, 1), loc="upper left")
-plt.subplots_adjust(left=None, bottom=None, right=0.8, top=None, wspace=None, hspace=None)
-plt.show()
-'''
 logistic_harvesting(RD, K, T, Q, E)
+
 figure, subp = plt.subplots(nrows=1, ncols=2, figsize=(12, 5))
 plt.suptitle("Population of ____ over {} years".format(T), fontsize=14)
 
@@ -115,13 +101,14 @@ subp[0].set_ylabel("Population")
 subp[0].set_title("Unharvested")
 subp[0].plot(plots["unharvested"]["values"], label=plots["unharvested"]["label"], color=plots["unharvested"]["colour"])
 subp[0].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+subp[0].set_xlabel(plots["t"]["label"])
 
 subp[1].set_title("Harvested")
 subp[1].plot(plots["harvested_fq"]["values"], label=plots["harvested_fq"]["label"], color=plots["harvested_fq"]["colour"])
 subp[1].plot(plots["harvested_fe"]["values"], label=plots["harvested_fe"]["label"], color=plots["harvested_fe"]["colour"])
 subp[1].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
+subp[1].set_xlabel(plots["t"]["label"])
 
-plt.xlabel(plots["t"]["label"])
 figure.tight_layout(pad=3)
 plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
