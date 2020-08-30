@@ -22,7 +22,8 @@ plots = \
             {
                 "label": "Unharvested",
                 "colour": "blue",
-                "values": [N_0]
+                "values": [N_0],
+                "delta nt": []
             },
         "harvested_fq":
             {
@@ -72,21 +73,38 @@ def gen_log(nt, growth_rate, carry_cap):
 
 # runs all models using gen_log with modifiers and checks for abs values
 for model in range(T):
-    plots["unharvested"]["values"].append(gen_log(plots["unharvested"]["values"][-1], RD, K))
+    # unharvested calc
+    nt1_unharvested = gen_log(plots["unharvested"]["values"][-1], RD, K)
+    plots["unharvested"]["values"].append(nt1_unharvested)
+    plots["unharvested"]["delta nt"].append(plots["unharvested"]["values"][-1] - plots["unharvested"]["values"][-2])
 
+    # quota harvesting calc
     nt1_quota = gen_log(plots["harvested_fq"]["values"][-1], RD, K) - Q
     if nt1_quota >= 0:
         plots["harvested_fq"]["values"].append(nt1_quota)
     else:
         plots["harvested_fq"]["values"].append(0)
 
+    # effort harvesting calc
     nt1_effort = gen_log(plots["harvested_fe"]["values"][-1], RD, K) - E * plots["harvested_fe"]["values"][-1]
     if nt1_effort >= 0:
         plots["harvested_fe"]["values"].append(nt1_effort)
     else:
         plots["harvested_fe"]["values"].append(0)
-    plots["harvested_fe"]["actual harvest"].append(E * nt1_effort)
     plots["harvested_fe"]["effort line"].append(E * plots["unharvested"]["values"][-1])
+
+for i in range(T + 1):
+    # quota harvesting actual harvest calc
+    if plots["harvested_fq"]["values"][i] > Q:
+        plots["harvested_fq"]["actual harvest"].append(Q)
+    else:
+        plots["harvested_fq"]["actual harvest"].append(plots["harvested_fq"]["values"][i])
+
+    # effort harvesting actual harvest calc
+    if plots["harvested_fe"]["values"][i] > E * plots["harvested_fe"]["values"][i]:
+        plots["harvested_fe"]["actual harvest"].append(E * plots["harvested_fe"]["values"][i])
+    else:
+        plots["harvested_fe"]["actual harvest"].append(plots["harvested_fe"]["values"][i])
 
 
 # create figure
@@ -113,9 +131,12 @@ plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hsp
 
 # print model output
 print(plots["harvested_fq"]["values"])
+print(plots["harvested_fq"]["actual harvest"])
 print(plots["harvested_fe"]["values"])
 print(plots["harvested_fe"]["actual harvest"])
 print(plots["harvested_fe"]["effort line"])
+print(plots["unharvested"]["values"])
+print(plots["unharvested"]["delta nt"])
 
 # show figure and plots
 plt.show()
