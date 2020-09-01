@@ -73,6 +73,14 @@ def gen_log(nt, growth_rate, carry_cap):
     return nt + growth_rate * nt * (1 - nt / carry_cap)
 
 
+# function that checks if harvest is absolute
+def max_0(harvest, harvest_list):
+    if harvest >= 0:
+        harvest_list.append(harvest)
+    else:
+        harvest_list.append(0)
+
+
 # runs all models using gen_log with modifiers and checks for abs values
 for model in range(T):
     # unharvested calc
@@ -82,19 +90,15 @@ for model in range(T):
 
     # quota harvesting calc
     nt1_quota = gen_log(plots["harvested_fq"]["values"][-1], RD, K) - Q
-    if nt1_quota >= 0:
-        plots["harvested_fq"]["values"].append(nt1_quota)
-    else:
-        plots["harvested_fq"]["values"].append(0)
+    max_0(nt1_quota, plots["harvested_fq"]["values"])
 
     # effort harvesting calc
     nt1_effort = gen_log(plots["harvested_fe"]["values"][-1], RD, K) - E * plots["harvested_fe"]["values"][-1]
-    if nt1_effort >= 0:
-        plots["harvested_fe"]["values"].append(nt1_effort)
-    else:
-        plots["harvested_fe"]["values"].append(0)
+    max_0(nt1_effort, plots["harvested_fe"]["values"])
+
     plots["harvested_fe"]["effort line"].append(E * plots["unharvested"]["values"][-1])
 
+# calculates actual harvest if applicable
 for i in range(T + 1):
     # quota harvesting actual harvest calc
     if plots["harvested_fq"]["values"][i] > Q:
