@@ -3,7 +3,10 @@
 #
 # Created by Samuel Kolston
 # Created on: 290820
-# Last edited: 040920 150800
+# Last edited: 040920 154900
+#
+# TO DO
+# -add function for plotting/subplotting
 
 # modules
 import matplotlib.pyplot as plt
@@ -17,8 +20,10 @@ N_0 = 1
 Q = 250
 E = 0.5
 S = 0.1
-SHOW_STATUS = False
-PLOT_TYPE = 1  # 0 for LHM, 1 for LHM with stochasticity
+# constants for debugging
+SHOW_STATUS = True
+SHOW_PLOTS = False
+
 
 # dict for model values and associated plot preferences
 plots = \
@@ -112,6 +117,14 @@ def randbetween(s_value):
     return s_value * (random.randint(-1000, 1000) / 1000)
 
 
+# calculates actual harvest
+def actual_harvest(harvest, state, actharvest_list):
+    if harvest > state:
+        actharvest_list.append(state)
+    else:
+        actharvest_list.append(harvest)
+
+
 # runs all models using gen_log with modifiers and checks for abs values
 for model in range(T):
     # unharvested
@@ -134,42 +147,19 @@ for model in range(T):
     max_0(stochastic_log(plots["fe_s"]["values"][-1], RD, K, plots["fe_s"]["sd"][-1]) - E * plots["fe_s"]["values"][-1],
           plots["fe_s"]["values"])
 
-
-# THIS SHOULD BE A FUNCTION
 # calculates actual harvest if applicable
 for i in range(T + 1):
-    # quota harvesting actual harvest calc
-    if plots["fq"]["values"][i] > Q:
-        plots["fq"]["actual harvest"].append(Q)
-    else:
-        plots["fq"]["actual harvest"].append(plots["fq"]["values"][i])
-
-    # effort harvesting actual harvest calc
-    if plots["fe"]["values"][i] > E * plots["fe"]["values"][i]:
-        plots["fe"]["actual harvest"].append(E * plots["fe"]["values"][i])
-    else:
-        plots["fe"]["actual harvest"].append(plots["fe"]["values"][i])
-
-    # stochastic quota harvesting actual harvest calc
-    if plots["fq_s"]["values"][i] > Q:
-        plots["fq_s"]["actual harvest"].append(Q)
-    else:
-        plots["fq_s"]["actual harvest"].append(plots["fq_s"]["values"][i])
-
-    # stochastic effort harvesting actual harvest calc
-    if plots["fe_s"]["values"][i] > E * plots["fe_s"]["values"][i]:
-        plots["fe_s"]["actual harvest"].append(E * plots["fe_s"]["values"][i])
-    else:
-        plots["fe_s"]["actual harvest"].append(plots["fe_s"]["values"][i])
-
+    actual_harvest(plots["fq"]["values"][i], Q, plots["fq"]["actual harvest"])
+    actual_harvest(plots["fe"]["values"][i], E * plots["fe"]["values"][i], plots["fe"]["actual harvest"])
+    actual_harvest(plots["fq_s"]["values"][i], Q, plots["fq_s"]["actual harvest"])
+    actual_harvest(plots["fe_s"]["values"][i], E * plots["fe_s"]["values"][i], plots["fe_s"]["actual harvest"])
 
 # FUNCTION FOR PLOTTING?
-# LHM plots
-if PLOT_TYPE == 0:
-    # create figure
-    figure, subp = plt.subplots(nrows=2, ncols=2, figsize=(12, 10))
-    figure.canvas.set_window_title("Population Growth Model - Samuel Kolston")
-    plt.suptitle("Population of ____ over {} years".format(T), fontsize=14)
+if SHOW_PLOTS:
+    # LHM plots
+    figure, subp = plt.subplots(num=1, nrows=2, ncols=2, figsize=(12, 10))
+    figure.canvas.set_window_title("Figure 1: LHM")
+    plt.suptitle("Population of Fish over {} years".format(T), fontsize=14)
 
     # top left subplot
     subp[0, 0].set_ylabel("Population")
@@ -206,11 +196,15 @@ if PLOT_TYPE == 0:
     plt.gcf().text(0.5, 0.05, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}"
                    .format(RD, K, T, Q, E), fontsize=12, ha="center")
 
-# LHM with stochasticity plots
-elif PLOT_TYPE == 1:
-    figure, subp = plt.subplots(nrows=1, ncols=1, figsize=(12, 10))
-    figure.canvas.set_window_title("Population Growth Model - Samuel Kolston")
-    plt.suptitle("Population of ____ over {} years".format(T), fontsize=14)
+    # adjust plots with spacing
+    figure.tight_layout(pad=3)
+    plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
+
+
+    # LHM with stochasticity plots
+    figure, subp = plt.subplots(num=2, nrows=1, ncols=1, figsize=(10, 8))
+    figure.canvas.set_window_title("Figure 2: LHM with Stochasticity")
+    plt.suptitle("Population of Fish over {} years with stochasticity".format(T), fontsize=14)
 
     subp.set_ylabel("Population")
     subp.set_title("Harvesting With Stochasticity")
@@ -223,9 +217,9 @@ elif PLOT_TYPE == 1:
     plt.gcf().text(0.5, 0.05, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}     $S$={}"
                    .format(RD, K, T, Q, E, S), fontsize=12, ha="center")
 
-# adjust both plots with spacing
-figure.tight_layout(pad=3)
-plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
+    # adjust plots with spacing
+    figure.tight_layout(pad=3)
+    plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
 # print model output
 if SHOW_STATUS:
@@ -244,5 +238,5 @@ if SHOW_STATUS:
     print("fixed effort stochastic actual harvest: ", plots["fe_s"]["actual harvest"])
     print("fixed effort stochastic effort line: ", plots["fe_s"]["effort line"])
 
-# show figure and plots
+# show figures and plots
 plt.show()
