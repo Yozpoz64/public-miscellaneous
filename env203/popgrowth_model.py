@@ -3,10 +3,10 @@
 #
 # Created by Samuel Kolston
 # Created on: 290820
-# Last edited: 040920 165100
+# Last edited: 040920 204400
 #
 # TO DO
-# -combine plotting and subplotting functions
+# -standard dev and other plotted calculations
 
 # modules
 import matplotlib.pyplot as plt
@@ -88,22 +88,22 @@ plots = \
     }
 
 
-# function that performs the base logistic calculation
+# performs the base logistic calculation
 def gen_log(nt, growth_rate, carry_cap):
     return nt + growth_rate * nt * (1 - nt / carry_cap)
 
 
-# function that performs the base logistic calculation with stochasticity
+# performs the base logistic calculation with stochasticity
 def stochastic_log(nt, growth_rate, carry_cap, sd):
     return nt + (growth_rate + growth_rate * sd) * nt * (1 - nt / carry_cap)
 
 
-# function that calculates S * D for stochasticity
+# calculates S * D for stochasticity
 def randbetween(s_value):
     return s_value * (random.randint(-1000, 1000) / 1000)
 
 
-# function that checks if harvest is absolute
+# checks if harvest is absolute
 def max_0(harvest, harvest_list):
     if harvest >= 0:
         harvest_list.append(harvest)
@@ -119,24 +119,18 @@ def actual_harvest(harvest, state, actharvest_list):
         actharvest_list.append(harvest)
 
 
-# plots data to subplots
-def subplotter(plot, sp_x, sp_y, title, xlabel, ylabel, series, labels, colours):
-    plot[sp_x][sp_y].set_title(title)
-    plot[sp_x][sp_y].set_xlabel(xlabel)
-    plot[sp_x][sp_y].set_ylabel(ylabel)
+# plots data, creates legend
+def plotter(plot, is_subplot, origin, title, xlabel, ylabel, series, labels, colours, legend):
+    if is_subplot:
+        tmp = plot[origin[0]][origin[1]]
+    else:
+        tmp = plot
+    tmp.set_title(title)
+    tmp.set_xlabel(xlabel)
+    tmp.set_ylabel(ylabel)
     for n_data in range(len(series)):
-        plot[sp_x][sp_y].plot(series[n_data], label=labels[n_data], color=colours[n_data])
-    plot[sp_x][sp_y].legend(ncol=2, bbox_to_anchor=(0.5, -0.15), loc="upper center")
-
-
-# plots data to individual plot
-def plotter(plot, title, xlabel, ylabel, series, labels, colours):
-    plot.set_title(title)
-    plot.set_xlabel(xlabel)
-    plot.set_ylabel(ylabel)
-    for n_data in range(len(series)):
-        plot.plot(series[n_data], label=labels[n_data], color=colours[n_data])
-    subp.legend(ncol=2, bbox_to_anchor=(0.5, -0.08), loc="upper center")
+        tmp.plot(series[n_data], label=labels[n_data], color=colours[n_data])
+    tmp.legend(ncol=2, bbox_to_anchor=(legend[0], legend[1]), loc="upper center")
 
 
 # add some parameters to lists for plotting
@@ -181,15 +175,16 @@ if SHOW_PLOTS:
     plt.suptitle("Population of Fish over {} years".format(T), fontsize=14)
 
     # plot data in subplots
-    subplotter(subp, 0, 0, plots["unharvested"]["label"], plots["t"]["label"], "Population",
+    plotter(subp, True, [0, 0], plots["unharvested"]["label"], plots["t"]["label"], "Population",
             [plots["unharvested"]["values"], plots["unharvested"]["delta nt"]], ["N", "Growth Rate"],
-            [plots["unharvested"]["colour"], "red"])
-    subplotter(subp, 0, 1, "Harvested", plots["t"]["label"], "Population", [plots["fq"]["values"], plots["fe"]["values"]],
-            [plots["fq"]["label"], plots["fe"]["label"]], [plots["fq"]["colour"], plots["fe"]["colour"]])
-    subplotter(subp, 1, 0, "Quota vs Actual Harvest (Fixed-quota)", plots["t"]["label"], "Population Harvest",
-            [plots["q"]["values"], plots["fq"]["actual harvest"]], ["Quota", "Actual Harvest"], ["black", "brown"])
-    subplotter(subp, 1, 1, "Fixed-effort Actual Harvest", plots["t"]["label"], "Population Harvest",
-            [plots["fe"]["actual harvest"]], ["Actual Harvest"], ["navy"])
+            [plots["unharvested"]["colour"], "red"], [0.5, -0.2])
+    plotter(subp, True, [0, 1], "Harvested", plots["t"]["label"], "Population", [plots["fq"]["values"], plots["fe"]["values"]],
+            [plots["fq"]["label"], plots["fe"]["label"]], [plots["fq"]["colour"], plots["fe"]["colour"]], [0.5, -0.2])
+    plotter(subp, True, [1, 0], "Quota vs Actual Harvest (Fixed-quota)", plots["t"]["label"], "Population Harvest",
+            [plots["q"]["values"], plots["fq"]["actual harvest"]], ["Quota", "Actual Harvest"], ["black", "brown"],
+                [0.5, -0.2])
+    plotter(subp, True, [1, 1], "Fixed-effort Actual Harvest", plots["t"]["label"], "Population Harvest",
+            [plots["fe"]["actual harvest"]], ["Actual Harvest"], ["navy"], [0.5, -0.2])
 
     # display constant values below plot
     plt.gcf().text(0.5, 0.05, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}"
@@ -205,12 +200,13 @@ if SHOW_PLOTS:
     plt.suptitle("Population of Fish over {} years with stochasticity".format(T), fontsize=14)
 
     # plot data
-    plotter(subp, "Harvesting With Stochasticity", plots["t"]["label"], "Population Harvest",
+    plotter(subp, False, 0, "Harvesting With Stochasticity", plots["t"]["label"], "Population Harvest",
             [plots["fq_s"]["values"], plots["fe_s"]["values"]],
-            [plots["fq_s"]["label"], plots["fe_s"]["label"]], [plots["fq"]["colour"], plots["fe"]["colour"]])
+            [plots["fq_s"]["label"], plots["fe_s"]["label"]], [plots["fq"]["colour"], plots["fe"]["colour"]],
+                [0.5, -0.08])
 
     # display constant values below plot
-    plt.gcf().text(0.5, 0.05, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}     $S$={}"
+    plt.gcf().text(0.5, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}     $S$={}"
                    .format(RD, K, T, Q, E, S), fontsize=12, ha="center")
 
     # adjust plots with spacing
