@@ -3,7 +3,7 @@
 #
 # Created by Samuel Kolston
 # Created on: 290820
-# Last edited: 040920 204400
+# Last edited: 160920 1133
 #
 # TO DO
 # -standard dev and other plotted calculations
@@ -14,7 +14,7 @@ import random
 
 # constants
 RD = 0.5
-K = 2000
+K = 1000
 T = 50
 N_0 = 100
 Q = 250
@@ -22,7 +22,7 @@ E = 0.5
 S = 0.1
 # constants for debugging
 SHOW_STATUS = False
-ISSUE = 3  # changes plot output for assignment (0 for old SHOW_PLOT)
+ISSUE = 1  # changes plot output for assignment (0 for old SHOW_PLOT)
 
 
 # dict for model values and associated plot preferences
@@ -232,7 +232,7 @@ if ISSUE == 0:
 elif ISSUE == 1:
     figure, subp = plt.subplots(num=2, nrows=1, ncols=2, figsize=(15, 6))
     figure.canvas.set_window_title("Figure 1: LHM")
-    plt.suptitle("Population of Fish over {} years (at various rates of growth)".format(T), fontsize=14)
+    plt.suptitle("Population of Fish over {} years at various Rates of Growth)".format(T), fontsize=14)
 
     plotter(subp, True, [0], "Unharvested Population", plots["t"]["label"], "Population",
             [plots["unharvested"]["values"], plots["unharvested"]["values rd1"], plots["unharvested"]["values rd2"]], ["N ($r_d=0.5$)", "N ($r_d=0$)", "N ($r_d=-0.5$)"],
