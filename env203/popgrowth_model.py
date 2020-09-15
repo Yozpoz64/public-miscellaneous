@@ -22,7 +22,7 @@ E = 0.5
 S = 0.1
 # constants for debugging
 SHOW_STATUS = False
-ISSUE = 1  # changes plot output for assignment (0 for old SHOW_PLOT)
+ISSUE = 2  # changes plot output for assignment (0 for old SHOW_PLOT)
 
 
 # dict for model values and associated plot preferences
@@ -115,6 +115,7 @@ def max_0(harvest, harvest_list):
 
         harvest_list.append(0)
 
+
 # calculates actual harvest
 def actual_harvest(harvest, state, actharvest_list):
     if harvest > state:
@@ -181,6 +182,7 @@ for i in range(T + 1):
     actual_harvest(plots["fq_s"]["values"][i], Q, plots["fq_s"]["actual harvest"])
     actual_harvest(plots["fe_s"]["values"][i], E * plots["fe_s"]["values"][i], plots["fe_s"]["actual harvest"])
 
+# combo of most plots (used for debugging)
 if ISSUE == 0:
     # LHM plots
     figure, subp = plt.subplots(num=1, nrows=2, ncols=2, figsize=(12, 10))
@@ -225,8 +227,9 @@ if ISSUE == 0:
     # adjust plots with spacing
     figure.tight_layout(pad=3)
     plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
-    
-if ISSUE == 1:
+
+# issue 1 - unharvested
+elif ISSUE == 1:
     figure, subp = plt.subplots(num=2, nrows=1, ncols=2, figsize=(15, 6))
     figure.canvas.set_window_title("Figure 1: LHM")
     plt.suptitle("Population of Fish over {} years (at various rates of growth)".format(T), fontsize=14)
@@ -238,17 +241,32 @@ if ISSUE == 1:
     plotter(subp, True, [1], "Unharvested Change in Population", plots["t"]["label"], "Population",
             [plots["unharvested"]["delta nt"], plots["unharvested"]["delta nt1"], plots["unharvested"]["delta nt2"]], ["\u0394N ($r_d=0.5$)", "\u0394N ($r_d=0$)", "\u0394N ($r_d=-0.5$)"],
             ["blue", "green", "red"], [0.7, -0.11])
-    
-    # display constant values below plot
+
     plt.gcf().text(0.5, 0.03, "where:\n$r_d$=[various]     $K$={}     $T$={}\n$Q$={}     $E$={}     $S$={}     $N_0$={}"
                    .format(K, T, Q, E, S, N_0), fontsize=12, ha="center")
 
-    # adjust plots with spacing
     figure.tight_layout(pad=3)
     plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
-    
+# issue 2 - fixed harvesting
+elif ISSUE == 2:
+    figure, subp = plt.subplots(num=2, nrows=1, ncols=2, figsize=(15, 6))
+    figure.canvas.set_window_title("Figure 2: LHM under harvesting")
+    plt.suptitle("Population of Fish over {} years under different Harvesting Methods".format(T), fontsize=14)
 
+    plotter(subp, True, [0], "Population Under Fixed-quota Harvesting", plots["t"]["label"], "Population",
+            [plots["fq"]["values"], plots["fq"]["actual harvest"]], ["N", "Actual Harvest"],
+            ["brown", "orange"], [0.3, -0.11])
+
+    plotter(subp, True, [1], "Population Under Fixed-effort Harvesting", plots["t"]["label"], "Population",
+            [plots["fe"]["values"], plots["fe"]["effort line"]], ["N", "Effort Line"],
+            [plots["unharvested"]["colour"], "red"], [0.7, -0.11])
+
+    plt.gcf().text(0.5, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}\n$Q$={}     $E$={}     $S$={}     $N_0$={}"
+                   .format(RD, K, T, Q, E, S, N_0), fontsize=12, ha="center")
+
+    figure.tight_layout(pad=3)
+    plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
 # print model output
 if SHOW_STATUS:
