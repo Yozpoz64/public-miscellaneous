@@ -22,7 +22,7 @@ E = 0.5
 S = 0.1
 # constants for debugging
 SHOW_STATUS = False
-ISSUE = 2  # changes plot output for assignment (0 for old SHOW_PLOT)
+ISSUE = 3  # changes plot output for assignment (0 for old SHOW_PLOT)
 
 
 # dict for model values and associated plot preferences
@@ -258,13 +258,36 @@ elif ISSUE == 2:
             [plots["fq"]["values"], plots["fq"]["actual harvest"]], ["N", "Actual Harvest"],
             ["brown", "orange"], [0.3, -0.11])
 
-    plotter(subp, True, [1], "Population Under Fixed-effort Harvesting", plots["t"]["label"], "Population",
-            [plots["fe"]["values"], plots["fe"]["effort line"]], ["N", "Effort Line"],
-            [plots["unharvested"]["colour"], "red"], [0.7, -0.11])
+    #plotter(subp, True, [1], "Population Under Fixed-effort Harvesting", plots["t"]["label"], "Population",
+     #       [plots["fe"]["values"], plots["fe"]["effort line"]], ["N", "Effort Line"],
+     #       [plots["unharvested"]["colour"], "red"], [0.7, -0.11])
+
+    subp[1].plot(plots["unharvested"]["values"], plots["unharvested"]["delta nt"])
+    subp[1].plot([Q] * K)
 
     plt.gcf().text(0.5, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}\n$Q$={}     $E$={}     $S$={}     $N_0$={}"
                    .format(RD, K, T, Q, E, S, N_0), fontsize=12, ha="center")
 
+    figure.tight_layout(pad=3)
+    plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
+
+# issue 3 - stochastic harvesting
+elif ISSUE == 3:
+    figure, subp = plt.subplots(num=2, nrows=1, ncols=1, figsize=(10, 8))
+    figure.canvas.set_window_title("Figure 3: LHM with Stochasticity")
+    plt.suptitle("Population of Fish over {} years with stochasticity".format(T), fontsize=14)
+
+    # plot data
+    plotter(subp, False, 0, "Harvesting With Stochasticity", plots["t"]["label"], "Population Harvest",
+            [plots["fq_s"]["values"], plots["fe_s"]["values"]],
+            [plots["fq_s"]["label"], plots["fe_s"]["label"]], [plots["fq"]["colour"], plots["fe"]["colour"]],
+            [0.5, -0.08])
+
+    # display constant values below plot
+    plt.gcf().text(0.5, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}     $S$={}"
+                   .format(RD, K, T, Q, E, S), fontsize=12, ha="center")
+
+    # adjust plots with spacing
     figure.tight_layout(pad=3)
     plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
