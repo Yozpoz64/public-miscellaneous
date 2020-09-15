@@ -16,13 +16,13 @@ import random
 RD = 0.5
 K = 2000
 T = 50
-N_0 = 1
+N_0 = 100
 Q = 250
 E = 0.5
 S = 0.1
 # constants for debugging
 SHOW_STATUS = False
-SHOW_PLOTS = True
+ISSUE = 1  # changes plot output for assignment (0 for old SHOW_PLOT)
 
 
 # dict for model values and associated plot preferences
@@ -33,7 +33,11 @@ plots = \
                 "label": "Unharvested",
                 "colour": "blue",
                 "values": [N_0],
-                "delta nt": []
+                "values rd1": [N_0],
+                "values rd2": [N_0],
+                "delta nt": [0],
+                "delta nt1": [0],
+                "delta nt2": [0]
             },
         "fq":
             {
@@ -108,8 +112,8 @@ def max_0(harvest, harvest_list):
     if harvest >= 0:
         harvest_list.append(harvest)
     else:
-        harvest_list.append(0)
 
+        harvest_list.append(0)
 
 # calculates actual harvest
 def actual_harvest(harvest, state, actharvest_list):
@@ -122,7 +126,10 @@ def actual_harvest(harvest, state, actharvest_list):
 # plots data, creates legend
 def plotter(plot, is_subplot, origin, title, xlabel, ylabel, series, labels, colours, legend):
     if is_subplot:
-        tmp = plot[origin[0]][origin[1]]
+        if len(origin) > 1:
+            tmp = plot[origin[0]][origin[1]]
+        else:
+            tmp = plot[origin[0]]
     else:
         tmp = plot
     tmp.set_title(title)
@@ -144,6 +151,12 @@ for model in range(T):
     # unharvested
     plots["unharvested"]["values"].append(gen_log(plots["unharvested"]["values"][-1], RD, K))
     plots["unharvested"]["delta nt"].append(plots["unharvested"]["values"][-1] - plots["unharvested"]["values"][-2])
+
+    # unharvested with different rd values TEMP
+    plots["unharvested"]["values rd1"].append(gen_log(plots["unharvested"]["values rd1"][-1], 0, K))
+    plots["unharvested"]["delta nt1"].append(plots["unharvested"]["values rd1"][-1] - plots["unharvested"]["values rd1"][-2])
+    plots["unharvested"]["values rd2"].append(gen_log(plots["unharvested"]["values rd2"][-1], -0.5, K))
+    plots["unharvested"]["delta nt2"].append(plots["unharvested"]["values rd2"][-1] - plots["unharvested"]["values rd2"][-2])
 
     # quota harvesting
     max_0(gen_log(plots["fq"]["values"][-1], RD, K) - Q, plots["fq"]["values"])
@@ -168,7 +181,7 @@ for i in range(T + 1):
     actual_harvest(plots["fq_s"]["values"][i], Q, plots["fq_s"]["actual harvest"])
     actual_harvest(plots["fe_s"]["values"][i], E * plots["fe_s"]["values"][i], plots["fe_s"]["actual harvest"])
 
-if SHOW_PLOTS:
+if ISSUE == 0:
     # LHM plots
     figure, subp = plt.subplots(num=1, nrows=2, ncols=2, figsize=(12, 10))
     figure.canvas.set_window_title("Figure 1: LHM")
@@ -212,6 +225,30 @@ if SHOW_PLOTS:
     # adjust plots with spacing
     figure.tight_layout(pad=3)
     plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
+    
+if ISSUE == 1:
+    figure, subp = plt.subplots(num=2, nrows=1, ncols=2, figsize=(15, 6))
+    figure.canvas.set_window_title("Figure 1: LHM")
+    plt.suptitle("Population of Fish over {} years (at various rates of growth)".format(T), fontsize=14)
+
+    plotter(subp, True, [0], "Unharvested Population", plots["t"]["label"], "Population",
+            [plots["unharvested"]["values"], plots["unharvested"]["values rd1"], plots["unharvested"]["values rd2"]], ["N ($r_d=0.5$)", "N ($r_d=0$)", "N ($r_d=-0.5$)"],
+            ["blue", "green", "red"], [0.3, -0.11])
+
+    plotter(subp, True, [1], "Unharvested Change in Population", plots["t"]["label"], "Population",
+            [plots["unharvested"]["delta nt"], plots["unharvested"]["delta nt1"], plots["unharvested"]["delta nt2"]], ["\u0394N ($r_d=0.5$)", "\u0394N ($r_d=0$)", "\u0394N ($r_d=-0.5$)"],
+            ["blue", "green", "red"], [0.7, -0.11])
+    
+    # display constant values below plot
+    plt.gcf().text(0.5, 0.03, "where:\n$r_d$=[various]     $K$={}     $T$={}\n$Q$={}     $E$={}     $S$={}     $N_0$={}"
+                   .format(K, T, Q, E, S, N_0), fontsize=12, ha="center")
+
+    # adjust plots with spacing
+    figure.tight_layout(pad=3)
+    plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
+
+    
+
 
 # print model output
 if SHOW_STATUS:
