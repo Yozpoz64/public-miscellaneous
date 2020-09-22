@@ -11,15 +11,16 @@
 # modules
 import matplotlib.pyplot as plt
 import random
+import numpy as np
 
 # constants
 RD = 0.5
 K = 2000
 T = 50
-N_0 = 2000
+N_0 = K
 Q = 250
-E = 0.5
-S = 0.1
+E = 0.25
+S = 0.25
 # constants for debugging
 SHOW_STATUS = False
 ISSUE = 3  # changes plot output for assignment (0 for old SHOW_PLOT)
@@ -60,6 +61,9 @@ plots = \
                 "label": "Stochastic Fixed-quota",
                 "colour": "pink",
                 "sd": [],
+                "stdev": [],
+                "stdev pos": [N_0],
+                "stdev neg": [N_0],
                 "values": [K],
                 "actual harvest": []
             },
@@ -68,6 +72,9 @@ plots = \
                 "label": "Stochastic Fixed-effort",
                 "colour": "green",
                 "sd": [],
+                "stdev": [],
+                "stdev pos": [N_0],
+                "stdev neg": [N_0],
                 "values": [K],
                 "effort line": [],
                 "actual harvest": []
@@ -117,6 +124,25 @@ def max_0(harvest, harvest_list):
         harvest_list.append(0)
 
 
+# is called every iteration of t (ie every year)
+def stochastic_avg(time, harvest_list, std_list):
+    # time = 10
+    # harvest_list = the fixed effort stochastic values to plot
+    tmp_harv = [harvest_list[-1]]
+    for i in range(time):
+        # performs standard stochastic calculation and adds output to tmp_harv
+        max_0(stochastic_log(tmp_harv[-1], RD, K, randbetween(S)) - E * tmp_harv[-1], tmp_harv)
+
+    # numpy calculations of mean and stdev
+    avg = np.mean(tmp_harv)
+    std = np.std(tmp_harv)
+    tmp_harv.clear()
+    print(std)
+
+    # adds average to fixed effort stochastic values to plot
+    harvest_list.append(avg)
+    std_list.append(std)
+
 # calculates actual harvest
 def actual_harvest(harvest, state, actharvest_list):
     if harvest > state:
@@ -136,11 +162,11 @@ def plotter(plot, is_subplot, origin, title, xlabel, ylabel, series, labels, col
         tmp = plot
     tmp.set_title(title)
     tmp.set_xlabel(xlabel)
-    tmp.set_ylim(0, K + 100)
+    tmp.set_ylim(0 - 100, K + 100)
     tmp.set_ylabel(ylabel)
     for n_data in range(len(series)):
         tmp.plot(series[n_data], label=labels[n_data], color=colours[n_data])
-    tmp.legend(ncol=1, bbox_to_anchor=(legend[0], legend[1]), loc="upper center")
+    tmp.legend(ncol=2, bbox_to_anchor=(legend[0], legend[1]), loc="upper center")
 
 
 # add some parameters to lists for plotting
@@ -171,11 +197,26 @@ for model in range(T):
     # stochastic quota harvesting
     plots["fq_s"]["sd"].append(randbetween(S))
     max_0(stochastic_log(plots["fq_s"]["values"][-1], RD, K, plots["fq_s"]["sd"][-1]) - Q, plots["fq_s"]["values"])
+    plots["fq_s"]["stdev"].append(np.std(plots["fq_s"]["values"]))
+    plots["fq_s"]["stdev pos"].append(plots["fq_s"]["values"][-1] + plots["fq_s"]["stdev"][-1])
+    plots["fq_s"]["stdev neg"].append(plots["fq_s"]["values"][-1] - plots["fq_s"]["stdev"][-1])
 
+    stochastic_avg(10, plots["fe_s"]["values"], plots["fe_s"]["stdev"])
+    plots["fe_s"]["stdev pos"].append(plots["fe_s"]["values"][-1] + plots["fe_s"]["stdev"][-1])
+    plots["fe_s"]["stdev neg"].append(plots["fe_s"]["values"][-1] - plots["fe_s"]["stdev"][-1])
+    '''
     # stochastic effort harvesting
-    plots["fe_s"]["sd"].append(randbetween(S))
-    max_0(stochastic_log(plots["fe_s"]["values"][-1], RD, K, plots["fe_s"]["sd"][-1]) - E * plots["fe_s"]["values"][-1],
-          plots["fe_s"]["values"])
+    for i in range(10):
+        plots["fe_s"]["sd"].append(randbetween(S))
+        max_0(stochastic_log(plots["fe_s"]["values"][-1], RD, K, plots["fe_s"]["sd"][-1]) - E * plots["fe_s"]["values"][-1],
+              plots["fe_s"]["values"])
+        plots["fe_s"]["stdev"].append(np.std(plots["fe_s"]["values"]))
+        #print(np.std(plots["fe_s"]["values"]))
+        #print(plots["fe_s"]["values"][-1])
+        #print(np.mean(plots["fe_s"]["values"]))
+    plots["fe_s"]["stdev pos"].append(plots["fe_s"]["values"][-1] + plots["fe_s"]["stdev"][-1])
+    plots["fe_s"]["stdev neg"].append(plots["fe_s"]["values"][-1] - plots["fe_s"]["stdev"][-1])
+'''
 
 # calculates actual harvest if applicable
 for i in range(T + 1):
@@ -237,7 +278,7 @@ elif ISSUE == 1:
         figure.canvas.set_window_title("Figure 1: LHM")
         plt.suptitle("Population of Fish over {} years at various Rates of Growth".format(T), fontsize=14)
 
-        plotter(subp, True, [0], "Unharvested Population", plots["t"]["label"], "Population (N)",
+        plotter(subp, True, [0], "Unharvested Population Growth", plots["t"]["label"], "Population (N)",
                 [plots["unharvested"]["values"], plots["unharvested"]["values rd1"], plots["unharvested"]["values rd2"], plots["k"]["values"]], ["N ($r_d=0.5$)", "N ($r_d=0$)", "N ($r_d=-0.5$)", "K"],
                 ["blue", "green", "red", "brown"], [0.3, -0.11])
 
@@ -278,19 +319,25 @@ elif ISSUE == 2:
                 ["Fixed Effort Actual Harvest", "Fixed Quota Actual Harvest"],
                 ["green", "orange"], [0.7, -0.11])
     elif FIGURE == 4:
-        figure, subp = plt.subplots(num=2, nrows=1, ncols=1, figsize=(16, 8))
+        figure, subp = plt.subplots(num=2, nrows=1, ncols=1, figsize=(9, 8))
         figure.canvas.set_window_title("Figure 2: LHM under harvesting")
+        plotter(subp, False, [0], "", plots["t"]["label"], "Population (N)",
+                [plots["fe"]["effort line"], plots["fe"]["values"]],
+                ["Effort line", "N (Fixed Effort)"],
+                ["pink", plots["unharvested"]["colour"]], [0.3, -0.11])
+        '''
         plt.suptitle("Population of Fish over {} years under different Harvesting Methods".format(T), fontsize=14)
-        #subp[0].plot(plots["fe"]["effort line"], color)
         subp.plot(plots["unharvested"]["values"], plots["unharvested"]["delta nt"], label="Unharvested Population Dynamics")
-        subp.plot(plots["unharvested"]["values"], plots["fe"]["effort line"], label="effort line")
+        subp.plot(plots["unharvested"]["values"], plots["fe"]["effort line"], label="Effort line")
         subp.set_xlabel("Population (N)")
         subp.set_ylabel("Change in Population (\u0394N)")
         subp.plot([Q] * K, label="Q")
-        subp.legend(ncol=1, bbox_to_anchor=(0.9, -0.11), loc="upper center")
+        '''
 
-    plt.gcf().text(0.5, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}\n$Q$={}     $E$={}     $N_0$={}"
-                   .format(RD, K, T, Q, E, N_0), fontsize=12, ha="center")
+        subp.legend(ncol=1, bbox_to_anchor=(0.7, -0.11), loc="upper center")
+
+    plt.gcf().text(0.3, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}\n$E$={}     $N_0$=1000"
+                   .format(RD, K, T, E, fontsize=12, ha="center"))
     figure.tight_layout(pad=3)
     plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
@@ -302,9 +349,9 @@ elif ISSUE == 3:
     if FIGURE == 5:
         # plot data
         plotter(subp, False, 0, "Harvesting With Stochasticity", plots["t"]["label"], "Population Harvest",
-                [plots["fq"]["values"], plots["fq_s"]["values"]],
-                ["Deterministic Fixed-quota", plots["fq_s"]["label"]], ["black", "red"],
-                [0.5, -0.08])
+                [plots["fq"]["values"], plots["fq_s"]["values"], plots["fq_s"]["stdev pos"], plots["fq_s"]["stdev neg"]],
+                ["Deterministic Fixed-quota", plots["fq_s"]["label"], "Average + Standard Deviation",
+                 "Average - Standard Deviation"], ["black", "red", "grey", "grey"], [0.5, -0.08])
 
         # display constant values below plot
         plt.gcf().text(0.5, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}     $S$={}"
@@ -313,9 +360,9 @@ elif ISSUE == 3:
     elif FIGURE == 6:
         # plot data
         plotter(subp, False, 0, "Harvesting With Stochasticity", plots["t"]["label"], "Population Harvest",
-                [plots["fe"]["values"], plots["fe_s"]["values"]],
-                ["Deterministic Fixed-effort", plots["fe_s"]["label"]], ["black", "red"],
-                [0.5, -0.08])
+                [plots["fe"]["values"], plots["fe_s"]["values"], plots["fe_s"]["stdev pos"], plots["fe_s"]["stdev neg"]],
+                ["Deterministic Fixed-effort", plots["fe_s"]["label"], "Average + Standard Deviation",
+                 "Average - Standard Deviation"], ["black", "red", "grey", "grey"], [0.5, -0.08])
 
         # display constant values below plot
         plt.gcf().text(0.5, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}     $Q$={}     $E$={}     $S$={}"
@@ -336,9 +383,11 @@ if SHOW_STATUS:
     print("fixed effort effort line: ", plots["fe"]["effort line"])
     print("\nfixed quota stochastic sd: ", plots["fq_s"]["sd"])
     print("fixed quota stochastic output: ", plots["fq_s"]["values"])
+    print("fixed quota stochastic standard deviation: ", plots["fq_s"]["stdev"])
     print("fixed quota actual harvest: ", plots["fq_s"]["actual harvest"])
     print("\nfixed effort stochastic sd: ", plots["fe_s"]["sd"])
     print("fixed effort stochastic output: ", plots["fe_s"]["values"])
+    print("fixed effort stochastic standard deviation: ", plots["fe_s"]["stdev"])
     print("fixed effort stochastic actual harvest: ", plots["fe_s"]["actual harvest"])
     print("fixed effort stochastic effort line: ", plots["fe_s"]["effort line"])
 
