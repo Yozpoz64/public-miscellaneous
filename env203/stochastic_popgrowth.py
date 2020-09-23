@@ -4,7 +4,7 @@
 #
 # Created by Samuel Kolston
 # Created on: 230920
-# Last edited: 230920 1704
+# Last edited: 240920 0725
 
 # modules
 import matplotlib.pyplot as plt
@@ -17,9 +17,9 @@ K = 2000
 T = 50
 N_0 = K
 Q = 250
-E = 0.25
+E = 0.4
 S = 0.5
-ISOLATED_SIMS = 10
+ISOLATED_SIMS = 1000
 
 # nested dict for values
 data = {
@@ -122,14 +122,14 @@ figure.canvas.set_window_title("Figure 3: LHM with Stochasticity")
 plt.suptitle("Population of Fish over {} years with stochasticity".format(T), fontsize=14)
 plotter(subp, 0, "Fixed-quota Stochastic Harvesting", "Years (t)", "Population (N)",
         [data["fq_s"]["averages"], data["fq_d"]["values"], data["fq_s"]["std_pos"], data["fq_s"]["std_neg"]],
-        ["Average (N)", "Deterministic (N)", "Average + Standard Deviation", "Average - Standard Deviation"],
+        ["FQ Average (N)", "Deterministic (N)", "Average + Standard Deviation", "Average - Standard Deviation"],
         ["red", "black", "grey", "grey"], [0.3, -0.15])
 plotter(subp, 1, "Fixed-effort Stochastic Harvesting", "Years (t)", "Population (N)",
         [data["fe_s"]["averages"], data["fe_d"]["values"], data["fe_s"]["std_pos"], data["fe_s"]["std_neg"]],
-        ["Average (N)", "Deterministic (N)", "Average + Standard Deviation", "Average - Standard Deviation"],
+        ["FE Average (N)", "Deterministic (N)", "Average + Standard Deviation", "Average - Standard Deviation"],
         ["green", "black", "grey", "grey"], [0.7, -0.15])
-plt.gcf().text(0.5, 0.02, "where:\n$r_d$={}     $K$={}     $T$={}     $N_0$={}\n$S$={}     $E$={}\nModel run {} times"
-               .format(RD, K, T, N_0, S, E, ISOLATED_SIMS), fontsize=10, ha="center")
+plt.gcf().text(0.5, 0.02, "where:\n$r_d$={}     $K$={}     $T$={}     $N_0$={}\n$S$={}     $E$={}     $Q$={}\n"
+                          "Model run {} times".format(RD, K, T, N_0, S, E, Q, ISOLATED_SIMS), fontsize=10, ha="center")
 figure.tight_layout(pad=3)
 plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
