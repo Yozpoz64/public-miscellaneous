@@ -14,7 +14,7 @@ import numpy as np
 # constants
 RD = 0.5
 K = 2000
-T = 50
+T = 500
 N_0 = K
 Q = 250
 E = 0.4

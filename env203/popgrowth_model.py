@@ -13,13 +13,13 @@ import random
 # constants
 RD = 0.5
 K = 2000
-T = 50
-N_0 = K
-Q = 250
-E = 0.25
+T = 100000
+N_0 = 2000
+Q = 400
+E = 0.499
 # constants for debugging
 SHOW_STATUS = False
-ISSUE = 2 # changes plot output for assignment (0 for old SHOW_PLOT)
+ISSUE = 2  # changes plot output for assignment (0 for old SHOW_PLOT)
 FIGURE = 4
 
 
@@ -41,14 +41,14 @@ plots = \
             {
                 "label": "Fixed-quota",
                 "colour": "pink",
-                "values": [K],
+                "values": [N_0],
                 "actual harvest": []
             },
         "fe":
             {
                 "label": "Fixed-effort",
                 "colour": "green",
-                "values": [K],
+                "values": [N_0],
                 "effort line": [0],
                 "actual harvest": []
             },
@@ -171,9 +171,13 @@ if ISSUE == 1:
         plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
     elif FIGURE == 2:
         figure, subp1 = plt.subplots(num=3, nrows=1, ncols=1, figsize=(9, 6))
-        plotter(subp1, False, [0], "Change in Population vs Population Size", plots["t"]["label"], "Population (N)",
-                [plots["unharvested"]["values"], plots["unharvested"]["delta nt"]], ["N", "\u0394N"], ["blue", "red"],
-                [0.7, -0.11])
+        #plotter(subp1, False, [0], "Change in Population vs Population Size", plots["t"]["label"], "Population (N)",
+        #        [plots["unharvested"]["values"], plots["unharvested"]["delta nt"]], ["N", "\u0394N"], ["blue", "red"],
+         #       [0.7, -0.11])
+        subp1.plot(plots["unharvested"]["values"], plots["unharvested"]["delta nt"], label="Unharvested Population Dynamics")
+        subp1.set_xlabel("Population (N)")
+        subp1.set_ylabel("Change in Population (\u0394N)")
+        subp1.legend(ncol=2, bbox_to_anchor=(0.7, -0.11), loc="upper center")
         plt.gcf().text(0.3, 0.02, "where:\n$r_d$={}    $K$={}     \n$T$={}     $N_0$={}"
                        .format(RD, K, T, N_0), fontsize=12, ha="center")
         figure.tight_layout(pad=3)
@@ -214,8 +218,8 @@ elif ISSUE == 2:
 
         subp.legend(ncol=1, bbox_to_anchor=(0.7, -0.11), loc="upper center")
 
-    plt.gcf().text(0.3, 0.03, "where:\n$r_d$={}     $K$={}     $T$={}\n$E$={}     $N_0$=1000"
-                   .format(RD, K, T, E, fontsize=12, ha="center"))
+    plt.gcf().text(0.2, 0.03, "               where:\n$r_d$={}     $K$={}     $T$={}\n$E$={}     $N_0$={}"
+                   .format(RD, K, T, E, N_0, fontsize=12, ha="center"))
     figure.tight_layout(pad=3)
     plt.subplots_adjust(left=None, bottom=0.2, right=0.9, top=None, wspace=None, hspace=None)
 
